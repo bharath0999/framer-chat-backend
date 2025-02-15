@@ -11,6 +11,12 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const ASSISTANT_ID = "asst_1bzW6Cul4Ngrg1HtSEA2ZZQ9"; // Replace with your actual OpenAI Assistant ID
 const OPENAI_API_URL = "https://api.openai.com/v1/threads";
 
+const HEADERS = {
+    Authorization: `Bearer ${OPENAI_API_KEY}`,
+    "Content-Type": "application/json",
+    "OpenAI-Beta": "assistants=v2" // ✅ Required header for Assistants API
+};
+
 // Route to interact with the AI Assistant
 app.post("/chat", async (req, res) => {
     try {
@@ -23,18 +29,8 @@ app.post("/chat", async (req, res) => {
         console.log("Received message:", message);
 
         // Step 1: Create a thread
-        const threadResponse = await axios.post(
-            OPENAI_API_URL,
-            {},
-            {
-                headers: {
-                    Authorization: `Bearer ${OPENAI_API_KEY}`,
-                    "Content-Type": "application/json"
-                }
-            }
-        );
-
-        console.log("Thread Response:", threadResponse.data); // Log thread response
+        const threadResponse = await axios.post(OPENAI_API_URL, {}, { headers: HEADERS });
+        console.log("Thread Response:", threadResponse.data);
 
         const threadId = threadResponse.data.id;
 
@@ -42,28 +38,17 @@ app.post("/chat", async (req, res) => {
         await axios.post(
             `${OPENAI_API_URL}/${threadId}/messages`,
             { role: "user", content: message },
-            {
-                headers: {
-                    Authorization: `Bearer ${OPENAI_API_KEY}`,
-                    "Content-Type": "application/json"
-                }
-            }
+            { headers: HEADERS }
         );
 
         // Step 3: Run the assistant
         const runResponse = await axios.post(
             `${OPENAI_API_URL}/${threadId}/runs`,
             { assistant_id: ASSISTANT_ID },
-            {
-                headers: {
-                    Authorization: `Bearer ${OPENAI_API_KEY}`,
-                    "Content-Type": "application/json"
-                }
-            }
+            { headers: HEADERS }
         );
 
         console.log("Run Response:", runResponse.data);
-
         const runId = runResponse.data.id;
 
         // Step 4: Wait for the assistant's response
@@ -75,12 +60,7 @@ app.post("/chat", async (req, res) => {
 
             const checkStatus = await axios.get(
                 `${OPENAI_API_URL}/${threadId}/runs/${runId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${OPENAI_API_KEY}`,
-                        "Content-Type": "application/json"
-                    }
-                }
+                { headers: HEADERS }
             );
 
             console.log("Check Status Response:", checkStatus.data);
@@ -88,12 +68,7 @@ app.post("/chat", async (req, res) => {
             if (checkStatus.data.status === "completed") {
                 const messagesResponse = await axios.get(
                     `${OPENAI_API_URL}/${threadId}/messages`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${OPENAI_API_KEY}`,
-                            "Content-Type": "application/json"
-                        }
-                    }
+                    { headers: HEADERS }
                 );
 
                 console.log("Messages Response:", messagesResponse.data);
