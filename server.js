@@ -17,25 +17,25 @@ const HEADERS = {
     "OpenAI-Beta": "assistants=v2"
 };
 
-// 📌 Functions for Personal Links
+// 📌 Functions for Personal Links (Clickable)
 async function bookCall() {
-    return "👉 Book a call with Bharath: https://cal.com/bharaths-design";
+    return `👉 <a href="https://cal.com/bharaths-design" target="_blank" rel="noopener noreferrer">Book a call with Bharath</a>`;
 }
 
 async function getPortfolio() {
-    return "🌐 View Bharath's portfolio: https://www.designwithbharath.com/";
+    return `🌐 <a href="https://www.designwithbharath.com/" target="_blank" rel="noopener noreferrer">View Bharath's portfolio</a>`;
 }
 
 async function getEmail() {
-    return "📧 Contact Bharath via email: https://Designwithbharath@gmail.com/";
+    return `📧 <a href="mailto:Designwithbharath@gmail.com">Contact Bharath via email</a>`;
 }
 
 async function getLinkedIn() {
-    return "💼 Connect with Bharath on LinkedIn: https://www.linkedin.com/in/bharath-kumar79/";
+    return `💼 <a href="https://www.linkedin.com/in/bharath-kumar79/" target="_blank" rel="noopener noreferrer">Connect with Bharath on LinkedIn</a>`;
 }
 
 async function getResume() {
-    return "📄 Download Bharath's resume: https://drive.google.com/file/d/1ttmiu9g53oUoXNPDDOAKd7GTkOr0g13c/view";
+    return `📄 <a href="https://drive.google.com/file/d/1ttmiu9g53oUoXNPDDOAKd7GTkOr0g13c/view" target="_blank" rel="noopener noreferrer">Download Bharath's resume</a>`;
 }
 
 // ✅ Chat Endpoint - Handles Function Calls
