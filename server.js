@@ -11,25 +11,25 @@ app.use(cors());
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 const HEADERS = {
-  Authorization: Bearer ${OPENAI_API_KEY},
+  Authorization: `Bearer ${OPENAI_API_KEY}`,
   "Content-Type": "application/json",
 };
 
 // 2) Your existing link functions (unchanged)
 async function bookCall() {
-  return 👉 <a href="https://cal.com/bharaths-design" target="_blank" rel="noopener noreferrer">Book a call with Bharath</a>;
+  return `👉 <a href="https://cal.com/bharaths-design" target="_blank" rel="noopener noreferrer">Book a call with Bharath</a>`;
 }
 async function getPortfolio() {
-  return 🌐 <a href="https://www.designwithbharath.com/" target="_blank" rel="noopener noreferrer">View Bharath's portfolio</a>;
+  return `🌐 <a href="https://www.designwithbharath.com/" target="_blank" rel="noopener noreferrer">View Bharath's portfolio</a>`;
 }
 async function getEmail() {
-  return 📧 <a href="mailto:Designwithbharath@gmail.com">Contact Bharath via email</a>;
+  return `📧 <a href="mailto:Designwithbharath@gmail.com">Contact Bharath via email</a>`;
 }
 async function getLinkedIn() {
-  return 💼 <a href="https://www.linkedin.com/in/bharath-kumar79/" target="_blank" rel="noopener noreferrer">Connect with Bharath on LinkedIn</a>;
+  return `💼 <a href="https://www.linkedin.com/in/bharath-kumar79/" target="_blank" rel="noopener noreferrer">Connect with Bharath on LinkedIn</a>`;
 }
 async function getResume() {
-  return 📄 <a href="https://drive.google.com/file/d/1ttmiu9g53oUoXNPDDOAKd7GTkOr0g13c/view" target="_blank" rel="noopener noreferrer">Download Bharath's resume</a>;
+  return `📄 <a href="https://drive.google.com/file/d/1ttmiu9g53oUoXNPDDOAKd7GTkOr0g13c/view" target="_blank" rel="noopener noreferrer">Download Bharath's resume</a>`;
 }
 
 // 3) Define the function schemas so GPT knows these functions exist
@@ -103,7 +103,7 @@ app.post("/chat", async (req, res) => {
     // If your front-end does NOT provide a system message, we can prepend one:
     const detailedSystemInstruction = {
       role: "system",
-      content: 
+      content: `
 You are Bharath's helpful assistant with access to the following functions:
 - book_call
 - get_portfolio
@@ -119,7 +119,7 @@ Detailed instructions:
 4. For all other questions or small talk not covered by these functions, respond in normal text.
 5. Remember to keep context from previous messages in mind. If they said "yes" regarding a function you offered, 
    proceed with calling that function. Avoid re-confirming or re-asking the same question.
-,
+`,
     };
 
     // If the messages array does NOT already have a system message, we can push one:
@@ -182,5 +182,5 @@ Detailed instructions:
 // 6) Start Server
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(✅ Server running on port ${PORT});
+  console.log(`✅ Server running on port ${PORT}`);
 });
