@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// 1) Your OpenAI config
+// ✅ OpenAI Config
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 const HEADERS = {
@@ -15,7 +15,7 @@ const HEADERS = {
   "Content-Type": "application/json",
 };
 
-// 2) Your existing link functions (unchanged)
+// ✅ Personal Links (Functions)
 async function bookCall() {
   return `👉 <a href="https://cal.com/bharaths-design" target="_blank" rel="noopener noreferrer">Book a call with Bharath</a>`;
 }
@@ -32,7 +32,7 @@ async function getResume() {
   return `📄 <a href="https://drive.google.com/file/d/1ttmiu9g53oUoXNPDDOAKd7GTkOr0g13c/view" target="_blank" rel="noopener noreferrer">Download Bharath's resume</a>`;
 }
 
-// 3) Define the function schemas so GPT knows these functions exist
+// ✅ OpenAI Function Schemas
 const OPENAI_FUNCTIONS = [
   {
     name: "book_call",
@@ -81,16 +81,9 @@ const OPENAI_FUNCTIONS = [
   },
 ];
 
-// 4) The /chat endpoint (multi-turn + function calling)
+// ✅ Chat Endpoint - Handles Function Calls
 app.post("/chat", async (req, res) => {
   try {
-    // We expect an array of messages from the client:
-    // e.g. [
-    //   { role: "system", content: "..." },
-    //   { role: "user", content: "How can I contact Bharath?" },
-    //   { role: "assistant", content: "...some text..." },
-    //   { role: "user", content: "Yes, I'd like to see his resume." }
-    // ]
     const { messages } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
@@ -99,8 +92,6 @@ app.post("/chat", async (req, res) => {
         .json({ error: "You must send a 'messages' array in the request body." });
     }
 
-    // 🏆 TIP: Insert or update the first system message if needed
-    // If your front-end does NOT provide a system message, we can prepend one:
     const detailedSystemInstruction = {
       role: "system",
       content: `
@@ -122,13 +113,11 @@ Detailed instructions:
 `,
     };
 
-    // If the messages array does NOT already have a system message, we can push one:
     const hasSystem = messages.some((m) => m.role === "system");
     if (!hasSystem) {
       messages.unshift(detailedSystemInstruction);
     }
 
-    // 5) Make the request to OpenAI with function_call: "auto"
     const response = await axios.post(
       OPENAI_API_URL,
       {
@@ -140,11 +129,9 @@ Detailed instructions:
       { headers: HEADERS }
     );
 
-    // Extract the assistant's new message
     const assistantMessage = response.data.choices[0].message;
     let assistantReply = assistantMessage.content || "";
 
-    // If GPT calls a function, handle it
     if (assistantMessage.function_call) {
       const functionName = assistantMessage.function_call.name;
 
@@ -169,7 +156,6 @@ Detailed instructions:
       }
     }
 
-    // Send the final text (or link) back
     res.json({ reply: assistantReply });
   } catch (error) {
     console.error("ChatGPT API Error:", error.response?.data || error.message);
@@ -179,7 +165,37 @@ Detailed instructions:
   }
 });
 
-// 6) Start Server
+// ✅ Webhook Endpoint - Handles Cal.com Booking Events
+app.post("/webhook/call-booked", async (req, res) => {
+  try {
+    const secret = process.env.WEBHOOK_SECRET; // Use your secret from Cal.com
+    const signature = req.headers["x-cal-signature"]; // Signature from Cal.com
+    const payload = JSON.stringify(req.body);
+
+    // Verify webhook signature
+    if (!signature || signature !== secret) {
+      console.log("Invalid signature. Webhook rejected.");
+      return res.status(401).send("Unauthorized");
+    }
+
+    // Process booking event
+    const bookingData = req.body;
+    console.log("✅ New Booking Received:", bookingData);
+
+    // Extract key information
+    const { name, email, startTime, eventType } = bookingData;
+
+    // Example: Send a response message
+    const responseMessage = `Booking confirmed for ${name} (${email}) on ${startTime}. Event type: ${eventType}`;
+
+    res.status(200).send(responseMessage);
+  } catch (error) {
+    console.error("❌ Webhook error:", error);
+    res.status(500).send("Error processing webhook");
+  }
+});
+
+// ✅ Start Server
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
